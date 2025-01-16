@@ -1,0 +1,59 @@
+---
+title: "Ejercicio*Nrormal-Gaussiano-PruebaJi"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+right=FALSE, col="skyblue", xlab="Resistencia", ylab="Frecuencia", main="Histograma de Resistencias")
+
+```{r}
+resistencia <- c(5, 6, 11, 17, 19, 19, 7, 2, 3, 1,0)  
+intervalos <- seq(28.70, 72.15, by=3.95)  
+
+hist(rep(intervalos[-length(intervalos)], resistencia), breaks=intervalos, 
+     main="Histograma de Resistencias", 
+     xlab="Resistencia", 
+     ylab="Frecuencia", 
+     col="lightblue", 
+     border="black")
+```
+
+
+```{r}
+# Parámetros de la  normal
+mu <- 45.47
+sigma <- sqrt(58.19)
+
+limites <- c(28.70, 32.65, 36.60, 40.55, 44.50, 48.45, 52.40, 56.35, 60.30, 64.25, 68.20)
+probabilidades <- pnorm(limites[-1], mean=mu, sd=sigma) - pnorm(limites[-length(limites)], mean=mu, sd=sigma)
+data.frame(Intervalo=paste(limites[-length(limites)], limites[-1], sep="-"), Probabilidad=probabilidades)
+
+```
+
+```{r}
+# Frecuencias observadas
+observadas <- c(5, 6, 11, 17, 19, 19, 7, 2, 3, 1)  
+
+# Parametros de la  normal
+media <- 45.47
+desviacion_estandar <- sqrt(58.19)
+intervalos <- seq(28.70, 68.20, by=3.95)
+
+probabilidades <- pnorm(intervalos[-1], mean=media, sd=desviacion_estandar) - 
+                  pnorm(intervalos[-length(intervalos)], mean=media, sd=desviacion_estandar)
+
+n_total <- sum(observadas)  
+esperadas <- probabilidades * n_total
+
+chi_resultado <- chisq.test(observadas, p=probabilidades, rescale.p = TRUE)
+chi_resultado
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

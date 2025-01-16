@@ -1,0 +1,247 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+set.seed(2024)  
+n <- 10000      
+k_values <- 1:3 
+
+samples_weibull <- rweibull(n, shape = 1, scale = 2)
+
+media_muestral <- function(x) mean(x)
+varianza_muestral <- function(x) var(x)
+
+mean_weibull <- media_muestral(samples_weibull)
+var_weibull <- varianza_muestral(samples_weibull)
+
+proportion_weibull <- sapply(k_values, function(k) {
+  mean(samples_weibull >= (mean_weibull - k * sqrt(var_weibull)) & 
+       samples_weibull <= (mean_weibull + k * sqrt(var_weibull)))
+})
+
+hist(samples_weibull, probability = TRUE, breaks = 30, 
+     main = "Histograma de la Distribución Weibull", 
+     xlab = "Valor", col = "lightblue", border = "black")
+```
+```{r}
+samples_weibull <- rweibull(n, shape = 2, scale = 2)
+
+media_muestral <- function(x) mean(x)
+varianza_muestral <- function(x) var(x)
+
+mean_weibull <- media_muestral(samples_weibull)
+var_weibull <- varianza_muestral(samples_weibull)
+
+proportion_weibull <- sapply(k_values, function(k) {
+  mean(samples_weibull >= (mean_weibull - k * sqrt(var_weibull)) & 
+       samples_weibull <= (mean_weibull + k * sqrt(var_weibull)))
+})
+
+hist(samples_weibull, probability = TRUE, breaks = 30, 
+     main = "Histograma de la Distribución Weibull", 
+     xlab = "Valor", col = "lightblue", border = "black")
+```
+
+```{r}
+# Distribución Weibull(4, 1)
+samples_weibull <- rweibull(n, shape = 3, scale = 4)
+
+# Función para media muestral y varianza muestral
+media_muestral <- function(x) mean(x)
+varianza_muestral <- function(x) var(x)
+
+mean_weibull <- media_muestral(samples_weibull)
+var_weibull <- varianza_muestral(samples_weibull)
+
+# Proporción de observaciones en el intervalo de k desviaciones estándar
+proportion_weibull <- sapply(k_values, function(k) {
+  mean(samples_weibull >= (mean_weibull - k * sqrt(var_weibull)) & 
+       samples_weibull <= (mean_weibull + k * sqrt(var_weibull)))
+})
+
+# Generar el histograma
+hist(samples_weibull, probability = TRUE, breaks = 30, 
+     main = "Histograma de la Distribución Weibull", 
+     xlab = "Valor", col = "lightblue", border = "black")
+```
+
+
+```{r}
+set.seed(2024)  
+n <- 10000      
+k_values <- 1:3 
+
+# Distribución Weibull(1, 2)
+samples_weibull <- rweibull(n, shape = 1, scale = 2)
+
+# Funciones para calcular media y varianza muestral
+media_muestral <- function(x) mean(x)
+varianza_muestral <- function(x) var(x)
+
+mean_weibull <- media_muestral(samples_weibull)
+var_weibull <- varianza_muestral(samples_weibull)
+
+# Proporción de observaciones en el intervalo de k desviaciones estándar
+proportion_weibull <- sapply(k_values, function(k) {
+  mean(samples_weibull >= (mean_weibull - k * sqrt(var_weibull)) & 
+       samples_weibull <= (mean_weibull + k * sqrt(var_weibull)))
+})
+
+# Histograma de la distribución Weibull
+hist(samples_weibull, probability = TRUE, breaks = 30, 
+     main = "Histograma de la Distribución Weibull", 
+     xlab = "Valor", col = "lightblue", border = "black")
+
+# Parámetros de la distribución Weibull
+k_param <- 1  # Shape
+lambda_param <- 2  # Scale
+
+# Definir el rango de tiempo
+t_values <- seq(0, 10, length.out = 1000)
+
+# Función de confiabilidad (Supervivencia)
+S_weibull <- function(t, k, lambda) {
+  exp(- (t / lambda)^k)
+}
+
+# Función de riesgo (Tasa de fallo)
+h_weibull <- function(t, k, lambda) {
+  (k / lambda) * (t / lambda)^(k - 1)
+}
+
+# Graficar la función de confiabilidad
+plot(t_values, S_weibull(t_values, k_param, lambda_param), type = "l", col = "blue", lwd = 2,
+     main = "Función de Confiabilidad Weibull(1, 2)",
+     xlab = "Tiempo", ylab = "S(t)",
+     ylim = c(0, 1))
+
+# Graficar la función de riesgo
+plot(t_values, h_weibull(t_values, k_param, lambda_param), type = "l", col = "red", lwd = 2,
+     main = "Función de Riesgo Weibull(1, 2)",
+     xlab = "Tiempo", ylab = "h(t)",
+     ylim = c(0, max(h_weibull(t_values, k_param, lambda_param))))
+```
+
+```{r}
+set.seed(2024)  
+n <- 10000      
+k_values <- 1:3 
+
+# Distribución Weibull(2, 2)
+samples_weibull <- rweibull(n, shape = 2, scale = 2)
+
+# Funciones para calcular media y varianza muestral
+media_muestral <- function(x) mean(x)
+varianza_muestral <- function(x) var(x)
+
+mean_weibull <- media_muestral(samples_weibull)
+var_weibull <- varianza_muestral(samples_weibull)
+
+# Proporción de observaciones en el intervalo de k desviaciones estándar
+proportion_weibull <- sapply(k_values, function(k) {
+  mean(samples_weibull >= (mean_weibull - k * sqrt(var_weibull)) & 
+       samples_weibull <= (mean_weibull + k * sqrt(var_weibull)))
+})
+
+# Histograma de la distribución Weibull
+hist(samples_weibull, probability = TRUE, breaks = 30, 
+     main = "Histograma de la Distribución Weibull", 
+     xlab = "Valor", col = "lightblue", border = "black")
+
+# Parámetros de la distribución Weibull
+k_param <- 2  # Shape
+lambda_param <- 2  # Scale
+
+# Definir el rango de tiempo
+t_values <- seq(0, 10, length.out = 1000)
+
+# Función de confiabilidad (Supervivencia)
+S_weibull <- function(t, k, lambda) {
+  exp(- (t / lambda)^k)
+}
+
+# Función de riesgo (Tasa de fallo)
+h_weibull <- function(t, k, lambda) {
+  (k / lambda) * (t / lambda)^(k - 1)
+}
+
+# Graficar la función de confiabilidad
+plot(t_values, S_weibull(t_values, k_param, lambda_param), type = "l", col = "blue", lwd = 2,
+     main = "Función de Confiabilidad Weibull(2, 2)",
+     xlab = "Tiempo", ylab = "S(t)",
+     ylim = c(0, 1))
+
+# Graficar la función de riesgo
+plot(t_values, h_weibull(t_values, k_param, lambda_param), type = "l", col = "red", lwd = 2,
+     main = "Función de Riesgo Weibull(2, 2)",
+     xlab = "Tiempo", ylab = "h(t)",
+     ylim = c(0, max(h_weibull(t_values, k_param, lambda_param))))
+
+```
+
+```{r}
+set.seed(2024)  
+n <- 10000      
+k_values <- 1:3 
+
+# Distribución Weibull(3, 4)
+samples_weibull <- rweibull(n, shape = 3, scale = 4)
+
+# Funciones para calcular media y varianza muestral
+media_muestral <- function(x) mean(x)
+varianza_muestral <- function(x) var(x)
+
+mean_weibull <- media_muestral(samples_weibull)
+var_weibull <- varianza_muestral(samples_weibull)
+
+# Proporción de observaciones en el intervalo de k desviaciones estándar
+proportion_weibull <- sapply(k_values, function(k) {
+  mean(samples_weibull >= (mean_weibull - k * sqrt(var_weibull)) & 
+       samples_weibull <= (mean_weibull + k * sqrt(var_weibull)))
+})
+
+# Histograma de la distribución Weibull
+hist(samples_weibull, probability = TRUE, breaks = 30, 
+     main = "Histograma de la Distribución Weibull", 
+     xlab = "Valor", col = "lightblue", border = "black")
+
+# Parámetros de la distribución Weibull
+k_param <- 3  # Shape
+lambda_param <- 4  # Scale
+
+# Definir el rango de tiempo
+t_values <- seq(0, 10, length.out = 1000)
+
+# Función de confiabilidad (Supervivencia)
+S_weibull <- function(t, k, lambda) {
+  exp(- (t / lambda)^k)
+}
+
+# Función de riesgo (Tasa de fallo)
+h_weibull <- function(t, k, lambda) {
+  (k / lambda) * (t / lambda)^(k - 1)
+}
+
+# Graficar la función de confiabilidad
+plot(t_values, S_weibull(t_values, k_param, lambda_param), type = "l", col = "blue", lwd = 2,
+     main = "Función de Confiabilidad Weibull(3, 4)",
+     xlab = "Tiempo", ylab = "S(t)",
+     ylim = c(0, 1))
+
+# Graficar la función de riesgo
+plot(t_values, h_weibull(t_values, k_param, lambda_param), type = "l", col = "red", lwd = 2,
+     main = "Función de Riesgo Weibull(3, 4)",
+     xlab = "Tiempo", ylab = "h(t)",
+     ylim = c(0, max(h_weibull(t_values, k_param, lambda_param))))
+```
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

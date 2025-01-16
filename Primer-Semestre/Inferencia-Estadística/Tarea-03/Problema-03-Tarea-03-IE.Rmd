@@ -1,0 +1,179 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## Problema 03
+En este ejercicio visualizaremos el Teorema de Moivre-Laplace (TML). Para p=0.1 
+y A = {5, 10, 20, 50, 100, 500}, grafica lo siguiente:
+
+a) Sobre la misma figura, grafica la función de masa g(x) de una distribución 
+Binomial(n,p) y la función de densidad f(x) de una distribución Normal(np,npq),
+para todo ``n" en A. (i.e. presenta las seis figuras).
+
+b) Haz lo mismo que en el inciso anterior, pero ahora para las funciones de 
+distribución acumuladas de las binomiales y normales anteriores. 
+
+c) Cuál es la relación entre as figuras anteruires y el TML? Cambia el resultado 
+si uno toma p=0.5 o p=0.9?
+
+
+Para el inciso a): El siguiente código genera seis figurar para comparar la 
+Distribución Binomial con su aproximación a la Normal para cada valor de nuestras
+n.
+
+```{r}
+# Parámetros
+p <- 0.1
+q <- 1 - p
+A <- c(5, 10, 20, 50, 100, 500)
+
+# Generar gráficos
+par(mfrow=c(3, 2))  # Para organizar las 6 gráficas
+
+for (n in A) {
+  x <- 0:n
+  binomial_vals <- dbinom(x, n, p)  # Función de masa binomial
+  normal_vals <- dnorm(x, mean=n*p, sd=sqrt(n*p*q))  # Aproximación normal
+  
+  plot(x, binomial_vals, type="h", lwd=2, col="blue", ylim=c(0, max(binomial_vals, normal_vals)), 
+       main=paste("n =", n), ylab="Probability/Density", xlab="x")
+  lines(x, normal_vals, col="red", lwd=2)  # Añadir la normal
+  legend("topright", legend=c("Binomial", "Normal"), col=c("blue", "red"), lty=1, lwd=2, xpd=TRUE, inset=c(0, +1.5))
+}
+
+```
+
+Podemos notar como a medida que n crece, la Binomial se aproxima cada vez mejor a la Normal. 
+Esto ya está establecido de entrada por el TML.
+
+A medida que n crece, la función de masa binomial se aproximará cada vez más a la curva normal,
+lo que visualiza el Teorema de Moivre-Laplace.
+
+
+
+```{r}
+# Parámetros
+p <- 0.1
+q <- 1 - p
+A <- c(5, 10, 20, 50, 100, 500)
+
+# Generar gráficos
+par(mfrow=c(3, 2))  # Para organizar las 6 gráficas
+
+for (n in A) {
+  x <- 0:n
+  binomial_cdf <- pbinom(x, n, p)  # Función de distribución acumulada binomial
+  normal_cdf <- pnorm(x, mean=n*p, sd=sqrt(n*p*q))  # Aproximación normal
+  
+  plot(x, binomial_cdf, type="s", lwd=2, col="blue", ylim=c(0, 1), 
+       main=paste("CDF =", n), ylab="CDF", xlab="x")
+  lines(x, normal_cdf, col="red", lwd=2)  # Añadir la CDF normal
+  legend("bottomright", legend=c("Binomial", "Normal"), col=c("blue", "red"), lty=1, lwd=2, xpd=TRUE, inset=c(0, +1.5))
+}
+```
+A medida que n crece, la CDF binomial se aproxima cada vez más a la CDF normal.
+Esto ilustra gráficamente el Teorema de Moivre-Laplace, que dice que la binomial 
+converge a la normal conforme n aumenta.
+
+
+##### PARA P=0.5 #####
+######################
+######################
+
+```{r}
+# Parámetros
+p <- 0.5
+q <- 1 - p
+A <- c(5, 10, 20, 50, 100, 500)
+
+# Generar gráficos
+par(mfrow=c(3, 2))  # Para organizar las 6 gráficas
+
+for (n in A) {
+  x <- 0:n
+  binomial_vals <- dbinom(x, n, p)  # Función de masa binomial
+  normal_vals <- dnorm(x, mean=n*p, sd=sqrt(n*p*q))  # Aproximación normal
+  
+  plot(x, binomial_vals, type="h", lwd=2, col="blue", ylim=c(0, max(binomial_vals, normal_vals)), 
+       main=paste("n =", n), ylab="Probability/Density", xlab="x")
+  lines(x, normal_vals, col="red", lwd=2)  # Añadir la normal
+  legend("topright", legend=c("Binomial", "Normal"), col=c("blue", "red"), lty=1, lwd=2, xpd=TRUE, inset=c(0, +1.5))
+}
+
+```
+
+```{r}
+# Parámetros
+p <- 0.5
+q <- 1 - p
+A <- c(5, 10, 20, 50, 100, 500)
+
+# Generar gráficos
+par(mfrow=c(3, 2))  # Para organizar las 6 gráficas
+
+for (n in A) {
+  x <- 0:n
+  binomial_cdf <- pbinom(x, n, p)  # Función de distribución acumulada binomial
+  normal_cdf <- pnorm(x, mean=n*p, sd=sqrt(n*p*q))  # Aproximación normal
+  
+  plot(x, binomial_cdf, type="s", lwd=2, col="blue", ylim=c(0, 1), 
+       main=paste("CDF =", n), ylab="CDF", xlab="x")
+  lines(x, normal_cdf, col="red", lwd=2)  # Añadir la CDF normal
+  legend("bottomright", legend=c("Binomial", "Normal"), col=c("blue", "red"), lty=1, lwd=2, xpd=TRUE, inset=c(0, +1.5))
+}
+```
+
+##### PARA P=0.9 #####
+######################
+######################
+
+```{r}
+# Parámetros
+p <- 0.9
+q <- 1 - p
+A <- c(5, 10, 20, 50, 100, 500)
+
+# Generar gráficos
+par(mfrow=c(3, 2))  # Para organizar las 6 gráficas
+
+for (n in A) {
+  x <- 0:n
+  binomial_vals <- dbinom(x, n, p)  # Función de masa binomial
+  normal_vals <- dnorm(x, mean=n*p, sd=sqrt(n*p*q))  # Aproximación normal
+  
+  plot(x, binomial_vals, type="h", lwd=2, col="blue", ylim=c(0, max(binomial_vals, normal_vals)), 
+       main=paste("n =", n), ylab="Probability/Density", xlab="x")
+  lines(x, normal_vals, col="red", lwd=2)  # Añadir la normal
+  legend("topright", legend=c("Binomial", "Normal"), col=c("blue", "red"), lty=1, lwd=2, xpd=TRUE, inset=c(0, +1.5))
+}
+
+```
+
+```{r}
+# Parámetros
+p <- 0.9
+q <- 1 - p
+A <- c(5, 10, 20, 50, 100, 500)
+
+# Generar gráficos
+par(mfrow=c(3, 2))  # Para organizar las 6 gráficas
+
+for (n in A) {
+  x <- 0:n
+  binomial_cdf <- pbinom(x, n, p)  # Función de distribución acumulada binomial
+  normal_cdf <- pnorm(x, mean=n*p, sd=sqrt(n*p*q))  # Aproximación normal
+  
+  plot(x, binomial_cdf, type="s", lwd=2, col="blue", ylim=c(0, 1), 
+       main=paste("CDF =", n), ylab="CDF", xlab="x")
+  lines(x, normal_cdf, col="red", lwd=2)  # Añadir la CDF normal
+  legend("bottomright", legend=c("Binomial", "Normal"), col=c("blue", "red"), lty=1, lwd=2, xpd=TRUE, inset=c(0, +1.5))
+}
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

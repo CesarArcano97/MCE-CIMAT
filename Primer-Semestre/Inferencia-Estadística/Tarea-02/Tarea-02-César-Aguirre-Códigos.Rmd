@@ -1,0 +1,250 @@
+---
+title: "Inferencia Estadística | Tarea 02"
+author: "Aguirre Calzadilla César Miguel"
+date: "2024-09-11"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+## Problema 04 
+a) Considera una moneda desequilibrada que tiene una probabilidad ``p" de obtener águila. Usando el comando sample, escribe una
+función que simule ``N" veces lanzamientos de esta moneda hasta obtener un águila. La función deberá recibir como parámetros a 
+la probabilidad ``p" de obtener águila y el número "N" de veces que se repite el experimento; y tendrá que regresar un vector de
+longitud "N" que contenga el número de lanzamientos hasta obtener un águila de cada uno de los ``N" experimentos. 
+
+```{r}
+# Función para simular los lanzamientos
+# Función vectorizada para simular lanzamientos hasta obtener un águila utilizando sample
+simular_moneda_sample <- function(p, N) {
+  resultados <- replicate(N, {
+    sum(cumsum(sample(c(0, 1), size = 1000, replace = TRUE, prob = c(1 - p, p))) == 0) + 1
+  })
+  return(resultados)
+}
+```
+
+* 'replicate(N, {})' es una función que permite el repetimiento de nuestro experimento dentro de 
+lo que pongamos en {} a lo largo de N veces.
+* 'sample()' es nuestra gunción donde se simula el lanamiento de la moneda, con 0 como soles y 
+1 como águilas. | 'replace = TRUE' es necesario para que cada lanzamiento sea independiente.
+* 'cumsum() == 0' es una función que utilizamos para generar un vector que cuenta el número total
+de éxitos (águilas) a lo largo de nuestros lanzamientos. Cuando verificamos con '== 0', se están 
+contando los lanzammientos hasta que se obtiene la priemra águila. 
+* 'sum()+1' es necesario para contar cuántas veces nuestra suma acumulada (cumsum) de águilas es 
+igual a cero. Esto es, el número de lanzmaientos que dan sol hasta que da la primera águila. Se
+suma el +1 para contar también el lanzamiento que finalmente dio águila. 
+
+Ya que tenemos neustra función, podemos utilizarla para compeltar los incisos (b) y (c). 
+
+b) Usando la función anterior, simule N=10^4 veces una variable aleatoria Geom(p), para p=0.5, 0.1, 0.01. 
+Grafica las frecuencias normalizadas en color azul. Spnre esta última figura empalme en rojo la gráfica de la función de masa 
+correspondiente. Qué observas?
+
+```{r}
+# Paámetros del experimento
+# Parámetros del experimento
+N <- 10^4
+ps <- c(0.5, 0.1, 0.01)  # Diferentes probabilidades de obtener águila
+
+# GRáfico
+colors <- c("blue", "green", "purple")  # Colores para diferentes p
+plot(NA, xlim = c(0, 100), ylim = c(0, 0.2), xlab = "Número de Lanzamientos", 
+     ylab = "Frecuencia Normalizada", main = "Frecuencia Normalizada de Experimentos Geométricos")
+
+# Realizar simulaciones y graficar
+for (i in 1:length(ps)) {
+  set.seed(123)  
+  resultados <- simular_moneda_sample(ps[i], N)
+  
+  # Calcular frecuencias normalizadas
+  frecuencias <- table(resultados) / N
+  points(as.numeric(names(frecuencias)), as.numeric(frecuencias), col = colors[i], pch = 16)
+  
+  # Graficar la función de masa geométrica teórica
+  x <- 1:max(as.numeric(names(frecuencias)))
+  lines(x, dgeom(x - 1, ps[i]), col = "red")
+}
+
+legend("topright", legend = paste("p =", ps), col = colors, pch = 16, bty = "n")
+
+```
+Podemos llegar a algunas conclusiones observando la gráfica de este inciso. Para comenzar, la gráfica nos está mostrando la frecuencia normalizada del número de lanzamientos hasta obtener el primer éxito (es decir, águila) en distitnas probabilidades 
+de ``p". Aquí, están marcadas en colores, azul para p=0.5, verde para p=0.1 y morado para p=0.01. 
+
+Creo que es bueno dejar claro que, en el eje X, estamos representando el número de lanzamientos, es decir, la cantidad necesaria de lanzamientos para obtener el primer éxito. En cuanto al eje Y, este representa la frecuencia normalizada, es decir, representa la proporción de experimentos donde el primer éxito ocurrió en cierta cantidad de lanzamientos. Así, cada punto en la gráfica indica la frecuencia con la que un número particular de lazamientos fue necesario para obtener el primer éxito. Si tenemos el punto (5, 0.05), significa que para el 5% de los ezperimentos se necesitaron exactamente 5 lanzamientos para obtener el primer éxito. 
+
+En cualquiera de los tres casos, se logra ver cierta tendencia de la distribución geométrica más clásica, quizás la más complicada de ver es la referente a la probailidad en morado. La mayoría de los éxitos ocurren en los primeros lanzamientos, esto es sobre todo notorio para p=01 y p=0.5. 
+
+A medida que la probabilidad va disminuyendo su valor, la distribución comienza a aplanarse, extendiendose. Esto nos está indicando que se necesitan más lanzamientos para obtener el primer éxito. Esto tiene sentido, pues nuestra probabilidad ``p" va disminuyendo en cada caso (azul, verde y morado). 
+
+En el caso de las líneas tojas, estas nos representan la función de masa de probabulidad teórica de la distribución geométrica para cada una de nuestras ``p". Podemos notar como las curvas teóricas se ajustan bien a nuestros valores empíricos (los puntos), por lo que la simulación muestra de manera correcta la forma de la distribución. Además, para cada uno de nuestros casos, a medida que aumenta el número de lanzamientos, la frecuencia normalizada tiende a cero. Esto es consistente con lo que podría esperarse para un experimento de este estilo, pues lanzara una moneda (aunque esté trucada) no debería llevar una enorme cantidad de lanzamientos para que finalmente caiga águila, nuestro primer éxito.
+
+Sin embargo, es claro como a medida que la probabilidad de éxito disminuye, son necesarios más lanzamientos para llegar a nuestro primer éxito. 
+
+
+c) Repita el inciso anterior para N=10^6. Además calcule el promedio y la desviación estándar de las simulaciones 
+realizadas. Qué se observa? 
+
+EL SIGUIENTE CÓDIGO TARDA EN EJECUTARSE UNOS CUANTOS SEGUNDOS
+
+
+```{r}
+# Parámetros del experimento
+N <- 10^6
+
+# Calcular para cada p y mostrar resultados
+for (p in ps) {
+  set.seed(123)  # Para reproducibilidad
+  resultados <- simular_moneda_sample(p, N)
+  
+  # Calcular el promedio y la desviación estándar
+  promedio <- mean(resultados)
+  desviacion_estandar <- sd(resultados)
+  
+  cat("Para p =", p, ": Promedio =", promedio, ", Desviación Estándar =", desviacion_estandar, "\n")
+}
+```
+
+EL CÓDIGO DE ARRIBA TARDA EN EJECUTARSE UNOS CUANTOS SEGUNDOS
+
+De aquí, podemos concluir lo siguiente: 
+
+* Promedio
+En el caso de una variable aleatoria geométrica con parámetro ``p", el promedio del númeor de lanzamientos hasta el primer éxito se modela como 1/p. 
+
+Entonces, para p=0.5, tenemos un promedio teórico de 1/0.5 = 2, nuestra msimulación para N=10^6 lanzamientos nos devuelve un primedio de 1.998857, algo muy cercano a lo esperado teóricamente. Esto se repite para p=0.1 y p=0.01, con promedios teóricos de 1/0.1=10 y 1/0.01=100, respectivamente, y promedios teóricos de 10.00283 y 100.124 en cada caso. Por lo tanto, nuestra simulación fue bastante correcta y refleja lo esperado por la teoría. 
+
+* Desviación estándar
+Ahora bien, la de desviación estándar de una variable aleatoria geométrica se modela como (\sqrt{1-p})/p, es decir, la raíz cuadrada de la diferencia entre 1 y p, sobre el valor p. Para p=0.5 la desviación estándar teórica es igual a 1.4142, para p=0.1 es igual a 9.4868, y para p=0.01 es igual a 99.4987. Nuestra simulación nos devuelve valores aproximados muy similares, con 1.4124, 9.4962 y 99.5146 respectivamente. Esto confirma que la simulación está trabajando bien. 
+
+Ahora bien, me gustaría dejar claro qué representan estos valores bajo este contexto. En este experimento, el promedio nos está indicando cuántos lanzamientos son necesarios para obtener nuestro primer éxito. Por otro lado, la desviación estándar nos indica cuánto varía el número de lnazmainetos necesarios para obtener dicho primer éxito, es decir, nos está indicando qué tan dispersos son los resultados alrededor del valor esperado. Tomando como ejemplo p=0.5, tenemos que la desviación estándar es de 1.414, entonces, aunque en promedio podemos epserar dos lanzamientos antes de obtener la primera águila, la cantidad de lanzamientos puede variar por 1.4 lanzamientos alrededor de nuestros promedio. En física, creo que esto puede ser representado como el error. Tenemos una medida promedio y para este caso tenemos que en la realdiad tenemos una incertidumbre de +- 1.4 lanzamietnos alrededor de los 2 lanzamientos necesarios. 
+
+De ese modo, podemos asegurar que nuestra simulación tiene consistencia con la teoría. Los resultados simulados del promedio y desviación estándar se comportan bien. También podemos hacer mención a que, en simulaciones, mientras más pruebas o iteraciones se hagan, si se hacen bien, los valores van a tender a converger hacia los resultados teóricos. Además, cuando ``p" es más pequeño, el número promedio de lanzamientos necesarios para obtener le primer éxito aumenta, y la viariabilidad (desviación estándar), también aumentan. De acuerdo a cómo se comporta la distribución geométrica, los eventos con menor probabilidad de éxito requieren un mayor número de intentosen promedio apra alcanzar el primer éxito. 
+
+
+## Problema 05
+
+Usando las ideas del inciso anterior, escriba una función en R que simule N veces los lanzamientos de una moneda hasta obtener r águilas. La función deberá recibir como parámetros a la probabilidad p de obtener águila, al número r de águilas a observar antes de detener el experimento y al número N de veces que se repite el experimento; y tendrá que regresar un vector de longitud N que contenga el número de lanzmaientos hasta obtener las r águilas en cada uno de los N experimentos. Grafique las frecuencias normalizadas de los experimentos para N=10^6, p=0.2, p=0.1 y r=2, r=7. Compárelos contra las funciones de masa de la distribución más adecauada para modelar este tipo de experimentos.
+
+Para este problema no implementé la rutina con la función sample, pues para hacerlo tenía que introducir un for que tarda mucho en correr. Busqué alternativas y utilicé mejor una rutina con la función rbinom() para simular los lanzamientos, en lugar de los ciclos. 
+
+La función de rbinom() genera números aleatorios siguiendo la distribución binomial negariva. Esta distribución es ideal para este problema pues estamos interesados en el número total de intentos necesarios para obtener un número fijo de éxitos (que la moneda caiga águila). Los supuestos que se cumplen para ello son:
+
+* Independencia de lanzamientos: cada resultados de lanzamiento de moneda es independiente, su resultado no afecta al de la siguiente tirada
+* Número fijo de éxitos: queremos llegar a un r dado de éxitos
+* Observación de Bernoulli: cada lanzamiento tiene solo dos posibles resultados: éxito (águila) o fracaso (sol) y la probabilidad de éxito permanece constante a lo largo del experimento. 
+
+```{r}
+# Función para simular los lanzamientos hasta obtener r águilas de manera optimizada
+moneda_binom_neg <- function(p, r, N) {
+  # Usamos rnbinom para generar el número de fracasos necesarios antes de obtener r éxitos
+  # rnbinom genera la cantidad de fracasos, así que sumamos 'r' para obtener el total de lanzamientos
+  lanzamientos <- rnbinom(N, size = r, prob = p) + r
+  return(lanzamientos)
+}
+
+# Parámetros 
+N <- 10^6
+ps <- c(0.2, 0.1)
+rs <- c(2, 7)
+
+# Plot
+colores <- c("blue", "green", "red", "purple")
+plot(1, type="n", xlim=c(0, 100), ylim=c(0, 0.2), 
+     xlab="Número de Lanzamientos", ylab="Frecuencia Normalizada", 
+     main="Frecuencia Normalizada de Experimentos Binomiales Negativos")
+
+# Simulación y comparación con la distribución binomial negativa
+for (index_p in 1:length(ps)) {
+  for (index_r in 1:length(rs)) {
+    p <- ps[index_p]
+    r <- rs[index_r]
+    
+    set.seed(123) 
+    resultados <- moneda_binom_neg(p, r, N)
+    
+    # Frecuencias normalizadas
+    hist_resultados <- hist(resultados, breaks=seq(0, max(resultados), by=1), plot=FALSE)
+    freq_normalizada <- hist_resultados$density
+    
+    # Graficar frecuencias normalizadas
+    points(hist_resultados$mids, freq_normalizada, col=colores[(index_p-1)*2 + index_r], pch=19)
+    
+    # Graficar función de masa teórica de la binomial negativa
+    x_vals <- 0:max(resultados)
+    lines(x_vals, dnbinom(x_vals, size=r, prob=p), col=colores[(index_p-1)*2 + index_r])
+  }
+}
+
+legend("topright", legend=paste("p =", rep(ps, each=2), ", r =", rep(rs, times=2)), 
+       col=colores, pch=19)
+
+```
+
+Ahora bien, las observaciones respecto al problema. Esta rutina simula el experimento de lanzar una moneda uan n cantidad de veces hasta obtener un número fijo de éxitos (águilas). Dicho número total de lanzamientos necesarios para obtener nuestros éxitos sigue una distribución binomial negativa que depende de nuestras variables p (probabilidad de obtener águila) y r (númnero de águilas deseado).
+
+Lo que estamos haciendo es realizar 10^6 simulaciones del experimento para diferentes combinaciones de p y de r. En cada una de ellas se revisa cuántos lanzamientos fueron necesarios hasta dar con los r éxitos. Tras cada simulación, se normalizan las frecuencias dividiendo entre N para obtener una frecuencia normailizada, la proporción de simualciones en las que se obtiene el número de lanzamientos. Las líneas suaves en el histograma representan la distribución teórica para cada caso. 
+
+En este caso, cada punto muestra la frecuencia normalizada para un número de lanzamientos fijo. En otras palabras, si el eje X marca n, y el punto tiene una altura de 0.1, entonces significa que el 10% de las simulaciones necesitaron exactamnte n lanzamientos para obtener r éxitos. Por ejemplo, si lancé la moneda hasta obtener 2 águilas, y para 50,000 de las 10^6 simulaciones se necesitaron solo 10 lanzmainetos, la frecuencia normalizada para n=10 será de 0.05, es decir, (50,000)/(10^6). ESte ejemplo nos devuelve un punto en x=10 y y=0.05.
+
+Utilizando dbinom() fue que pudimos hacer la comparación entre la simulación y la curva teórica que debería describir a la distribución binomial negativa de este problema. Esta curva muestra la probabilidad teórica de que se necesiten exactamente n lanzaminetos hasta obtener nuestros r éxitos deseados. Podemos notar como la curva se alinea bastante bien a nuestros resultados empíricos, por lo que podemos concluir que nuestro modelo simula bien lo esperado pro la teoría. Entonces, la simulación refleja bien un comportamiento binomial negativo. 
+
+Entrando en detalle, cuando tenemos una p grande (de 0.2 en lugar de 0.1) la distribución tiende a concentrarse en un menor número de lanzamientos. Esto hace sentido si pensamos que con mayor probabilidad de éxito, entonces se necesitarán menos lanzamientos para obtener nuestra cantidad deseada de éxitos. 
+
+Por otra parte, si tenemos valores más grandes de r, es decir, una mayor cantidad de éxitos deseados, la distribución tiende a extenderse más hacia números de lanzmaientos mayores. Nuevamente, esto hace sentido, pues queremos más éxitos, por lo tanto, hay cierta tendencia a necesitar mayor cantidad de lanzamientos para llegar al r deseado. 
+
+Asimismo, las distribuciones con p=0.1 muestran una dispersión más grande. Esto significa que las curvas se extienden más a lo largo del eje X (eje de los lanzamientos). La razón detrás de esto radica en que con una menor probabilidad de éxito por lanzamiento, entonces será más probable que se necesuten más intentos para obtener el núemro deseado de éxitos. En el caso de las simulaciones con r=7, podemos notar como las curvas se extienden más horizontalmente, meintras que las que tienen r=2 presentan un pico ligeramente más claro, sobre todo para la combinación p=0.2 y r=2, esto también hace sentido, pues tenemos una probabilidad mayor de éxito con una menor cantidad de éxitos necesarios. 
+
+
+
+## Problema 9
+
+```{r}
+simulacion_proceso_poisson <- function(lambda, T, dt) {
+  numero_intervalos <- T / dt  
+  matriz_bernoulli <- runif(numero_intervalos)  
+  probabilidad_de_eventos <- lambda * dt + 1e-6  
+  eventos <- matriz_bernoulli < probabilidad_de_eventos  
+  tiempo_evento <- seq(0, T - dt, by = dt)[eventos]  
+  
+  return(tiempo_evento) 
+}
+
+# Simulación de trayectorias
+lambda_1 <- 2
+T1 <- 10
+dt <- 0.01
+trayectoria_1 <- simulacion_proceso_poisson(lambda_1, T1, dt)
+trayectoria_2 <- simulacion_proceso_poisson(lambda_1, T1, dt)
+trayectoria_3 <- simulacion_proceso_poisson(lambda_1, T1, dt)
+
+# Graficar trayectorias acumuladas
+plot(0, 0, xlim = c(0, T1), 
+     ylim = c(0, max(c(length(trayectoria_1), length(trayectoria_2), length(trayectoria_3)))),
+     type = "n", xlab = "Tiempo", ylab = "Eventos Acumulados", 
+     main = "Trayectorias Acumuladas del Proceso de Poisson")
+
+# Graficar las líneas de eventos (sin acumular los tiempos)
+lines(trayectoria_1, 1:length(trayectoria_1), col = "purple", type = "s")
+lines(trayectoria_2, 1:length(trayectoria_2), col = "orange", type = "s")
+lines(trayectoria_3, 1:length(trayectoria_3), col = "red", type = "s")
+
+N <- numeric(numero_de_simulaciones)
+for (i in 1:numero_de_simulaciones) {
+  eventos <- simulacion_proceso_poisson(lambda_2, T2, dt)  # Simula el proceso para lambda = 0.5 y T = 1.
+  N[i] <- length(eventos)  # Se almacena el número total de eventos.
+}
+
+#Aquí se simulan 10,000 realizaciones de un proceso de Poisson con tasa λ = 0.5 en el intervalo [0, 1], y se cuenta el número de eventos ocurridos en la simulación. Este número se guarda en el vector N.
+
+hist(N, breaks = seq(-0.5, max(N) + 0.5, 1), probability = TRUE, 
+     main = "Comparación de histogramas", xlab = "Número de eventos", 
+     ylab = "Densidad", col = "lightblue", border = "white")
+
+pois_dist <- dpois(x, lambda_2 * T2)
+barplot(pois_dist, names.arg = x, space = 0, col = rgb(1, 0, 0, 0.5), 
+        border = "red", add = TRUE, axisnames = FALSE)
+
+#Primero, se crea un histograma del número de eventos simulados en cada realización del proceso. Luego, se superpone la distribución teórica de Poisson con parámetros λ·T = 0.5, que describe el número de eventos en el intervalo [0, 1] según la distribución de Poisson. La comparación entre el histograma y la distribución teórica permite evaluar si los resultados simulados siguen la distribución esperada.
+```

@@ -1,0 +1,327 @@
+---
+title: "Problema-05-Tarea-03-Inferencia-Estadística"
+author: "César Aguirre"
+output: html_notebook
+---
+
+### Problema 05
+El siguiente conjunto de datos contiene mediciones del diámetro de un agave, medido en decímetros, en distinras locaciones no cercanas. (El conjunto de datos se presenta en el código).
+
+Antes que nada, sería bueno hablar un poco acerca de la Distribución Empírica. Se trata de una distribución basada en los datos que se observan, en este caso, los diámetros del agave, sin asumir ningún modelo previamente. Esta es una de las principales diferencias con una distribución teórica establecida, como la normal o la binomial. Es bastante útil para describir la probabilidad acumulada de un conjutno de datos observados. 
+
+Su funcionamiento es, básicamente, el siguiente:
+
+Para un conjunto de datos $D =  {d_1, d_2, d_3, ..., d_n}$ la función de distribución empírica $F_D (x)$ evalúa la proporción de los datos que son menor o iguales a un $x$ seleccionado:
+
+\begin{equation*}
+  F_D (x) = \frac{\text{Número de elementos en D \leq x}}{n}
+\end{equation*}
+
+Esta función toma valores en el rango de [0,1], además de ser no decreciente con saltos en los puntos donde encontramos las observaciones de los datos. Cada salto tiene un incremento de magnitud $\frac{1}{n}$, con $n$ como el tamaño del conjunto de datos. 
+
+a) Escriba una función en R que calcule la función de distribución empírica para un conjunto de datos dado D. La función debe tomar como parámetro al valor $x$ donde se evalúa y al conjunto de datos D. Utilizando esta función, grafique la función de distribución empírica asociada al conjunto de datos de agave. Ponga atención a los puntos de discontinuidad. \?Qué observa? Nota: escriba la función mediante el algoritmo descrito en las notas de la clase; para este ejercicio no vale usar funciones implementadas en R que hacen lo pedido. 
+
+```{r}
+# Vamos a definir primero nuestra función de dsitribución empírica
+distribución_empírica <- function(x, Datos){
+  return(sum(Datos <= x)/(length(Datos)+1))
+}
+
+# Ahora implementamos el conjunto de datos
+diametro_agave <- c(23.37, 21.87, 24.41, 21.27, 23.33, 15.20, 24.21, 27.52, 
+                     15.48, 27.19, 25.05, 20.40, 21.05, 28.83, 22.90, 18.00, 
+                     17.55, 25.92, 23.64, 28.96, 23.02, 17.32, 30.74, 26.73, 
+                     17.22, 22.81, 20.78, 23.17, 21.60, 22.37)
+
+valores_x <- sort(unique(diametro_agave)) # Se hace el sort y el unique para asegurar que no se repitan datos
+#aunque en este caso no sucede
+
+valores_empirica <- sapply(valores_x, distribución_empírica, Datos = diametro_agave)
+
+plot(valores_x, valores_empirica, type = "p", main = "Función de Distribución Empírica (Agave)",
+     xlab = "Diámetro (dm)", ylab = "F(x)", col = "Royal Blue 3", lwd = 2)
+#print(valores_empirica)
+print(length(valores_x))
+```
+Observaciones: podemos notar como la distribuciín empírica tiene saltos en los putnos donde hay datos, y los saltos son de magnitud $\frac{1}{n}$. Esto indica cómo la función de distribución se mantiene constante hasta el siguiente valor que provoca el salto. También podemos ver cómo la función es monótona no decreciente. 
+
+b) Escriba una función en R que determine la gráfica Q-Q Normal de un conjunto de datos. La función debe tomar como parámetro al conjunto de datos y deberá graficar contra el percentil estandarizado de la normal. Para poder comparar el ajuste más claramente, la función además deberá ajustar en rojo a la recta $sx + \bar{x}$ (con $s$ como a desviación estándar muestral, y $\bar{x}$ como la media muestral). Usando esta función, determine la gráfica Q-Q Normal. \? Qué observa?
+
+
+```{r}
+qq_normal_agave <- function(datos){
+  datos_ordenados <- sort(datos)
+  n <- length(datos)
+  percentiles_teoricos_normal<- qnorm((1:n-0.5)/n) # Cuantiles teóricos de una normal estándar
+  
+  media_muestral <- mean(datos)
+  desviación_muestral <- sd(datos)
+  
+  plot(percentiles_teoricos_normal, datos_ordenados,
+       main = "Q-Q Normal para diámetros de agave",
+       xlab = "Cuantiles teóricos de la Normal Estándar",
+       ylab = "Datos observados (Diámetros de Agave)",
+       pch = 20, col = "Royal Blue 3", cex = 1.2)
+  
+  abline(a = media_muestral, b = desviación_muestral, col = "red", lwd = 1) # Gráfica de la recta
+  cat('Media muestral:', media_muestral, "\n")
+  cat("Desviación estándar muestral:", desviación_muestral, "\n")
+}
+
+diametros_agave <- c(23.37, 21.87, 24.41, 21.27, 23.33, 15.20, 24.21, 27.52, 
+                     15.48, 27.19, 25.05, 20.40, 21.05, 28.83, 22.90, 18.00, 
+                     17.55, 25.92, 23.64, 28.96, 23.02, 17.32, 30.74, 26.73, 
+                     17.22, 22.81, 20.78, 23.17, 21.60, 22.37)
+
+qq_normal_agave(diametros_agave)
+```
+
+c) Añada a la función anterior (función de distribución empírica y Q-Q Normal), la opción de que grafiquen la banda de confianza, de cobertura $1-\alpha$, basada en el estadístico de Kolmogorov-Smirnov. La función debe tomar como parámetros al conjunto de datos y el nivel de confianza $1-\alpha$. Aplique esta función al conjunto de datos para un nuvel de confianza $1-\alpha = 0.95, 0.99$. \? Qué observa? 
+
+Nota: recurra a las notas sobre las bandas de confianza de los gráficos Q-Q Normales que se incluyeron en la clase. No vale usar funciones implementadas en R que hacen lo pedido. No es necesario entender a detalle la prueba de Kolmogorov-Smirnov, en este punto consideraremos su aspecto operacional, al final del curso, en una de las exposiciones finales, se preentará la prueba con detalle.
+
+Primero que nada, las bandas de confianza proporcionan un intervalo en el que es probable que caigan los puntos del gráfico Q-Q, dado un nivel de confianza $1-\alpha$. La banda de congianza se construye de la sigueinte manera:
+
+$C(n,\alpha) = \pm \frac{c_\alpha}{\sqrt{n}}$
+
+Con $n$ como el tamaño de la muestra, y $c_\aloha$ es un valor crítico para el nivel de confianza deseado. El valor crítico depende del nivel de confianza $1-\alpha$. Existen tablas definidas para visualizar fácilmente distintos niveles de confianza comúnmente utilizados, pero este puede calcularse con la siguiente aproximación:
+
+$c_\alpha = \sqrt{-\frac{1}{2} ln(\frac{\alpha}{2})}$
+
+Para los valores $\alpha = 0.05 \Rightarrow c_\alpga = 1.358$, y para $\alpha = 0.01 \Rightarrow c_\alpga = 1.627$. Con esta información, podemos agregar las bandas de confianza al gráfico Q-Q. 
+
+
+```{r}
+qq_plot_intervalos_confianza <- function(datos, alpha = 0.05){
+  datos_ordenados <- sort(datos)
+  
+  n <- length(datos_ordenados)
+  p_i <- ((1:n-0.5)/n)
+  percentiles_teoricos_normal <- qnorm(p_i)
+  
+  media_muestral <- mean(datos)
+  desviación_muestral <- sd(datos)
+  
+  plot(percentiles_teoricos_normal, datos_ordenados,
+       main = "Q-Q Normal para diámetros de agave",
+       xlab = "Cuantiles teóricos de la Normal Estándar",
+       ylab = "Datos observados (Diámetros de Agave)",
+       pch = 20, col = "Royal Blue 3", cex = 1.2)
+  
+  abline(a = media_muestral, b = desviación_muestral, col = "red", lwd = 1) # Gráfica de la recta
+  cat('Media muestral:', media_muestral, "\n")
+  cat("Desviación estándar muestral:", desviación_muestral, "\n")
+  
+  c_alpha <- sqrt(-log(alpha/2)/(2*n))
+  bandas_confianza_superior <- qnorm(p_i + c_alpha)
+  bandas_conafianza_inferior <- qnorm(p_i - c_alpha)
+  
+  lines(bandas_confianza_superior, datos_ordenados, col = 'green', lty = 2)
+  lines(bandas_conafianza_inferior, datos_ordenados, col = 'green', lty = 2)
+}
+
+qq_plot_intervalos_confianza(diametros_agave, alpha = 0.05)
+qq_plot_intervalos_confianza(diametros_agave, alpha = 0.01)
+```
+
+```{r}
+# Función de distribución empírica con intervalos de confianza
+distribucion_empirica_intervalos_confianza <- function(Datos, alpha = 0.05) {
+  n <- length(Datos) + 1
+  valores_x <- sort(unique(Datos))
+  valores_empirica <- sapply(valores_x, function(x) sum(Datos <= x) / n)
+  
+  # Cálculo del estadístico de Kolmogorov-Smirnov para las bandas de confianza
+  c_alpha <- sqrt(-log(alpha / 2) / (2 * n))
+  
+  # Bandas de confianza (superior e inferior)
+  bandas_confianza_superior <- pmin(1, valores_empirica + c_alpha)
+  bandas_confianza_inferior <- pmax(0, valores_empirica - c_alpha)
+  
+  # Gráfico de la función de distribución empírica
+  plot(valores_x, valores_empirica, type = "p", 
+       main = "Función de Distribución Empírica (Agave) con Intervalos de Confianza",
+       xlab = "Diámetro (dm)", ylab = "F(x)", 
+       col = "Royal Blue 3", lwd = 2)
+  
+  # Añadir bandas de confianza al gráfico
+  lines(valores_x, bandas_confianza_superior, col = "green", lty = 2)
+  lines(valores_x, bandas_confianza_inferior, col = "green", lty = 2)
+  
+  # Imprimir longitud de los valores para verificación
+  print(length(valores_x))
+}
+
+# Conjunto de datos de diámetros de agave
+diametro_agave <- c(23.37, 21.87, 24.41, 21.27, 23.33, 15.20, 24.21, 27.52, 
+                    15.48, 27.19, 25.05, 20.40, 21.05, 28.83, 22.90, 18.00, 
+                    17.55, 25.92, 23.64, 28.96, 23.02, 17.32, 30.74, 26.73, 
+                    17.22, 22.81, 20.78, 23.17, 21.60, 22.37)
+
+# Llamada a la función para generar la gráfica con intervalos de confianza
+distribucion_empirica_intervalos_confianza(diametro_agave, alpha = 0.05)
+distribucion_empirica_intervalos_confianza(diametro_agave, alpha = 0.01)
+```
+
+
+```{r}
+# Función de distribución empírica con intervalos de confianza
+distribucion_empirica_intervalos_confianza <- function(Datos, alpha = 0.05) {
+  n <- length(Datos) + 1
+  valores_x <- sort(unique(Datos))
+  valores_empirica <- sapply(valores_x, function(x) sum(Datos <= x) / n)
+  
+  c_alpha <- sqrt(1 / (2 * n) * log(2 / alpha))
+  
+  # Bandas de confianza (superior e inferior)
+  bandas_confianza_superior <- pmin(1, valores_empirica + c_alpha)
+  bandas_confianza_inferior <- pmax(0, valores_empirica - c_alpha)
+  
+  # Gráfico de la función de distribución empírica
+  plot(valores_x, valores_empirica, type = "p", 
+       main = "Función de Distribución Empírica (Agave) con Intervalos de Confianza",
+       xlab = "Diámetro (dm)", ylab = "F(x)", 
+       col = "Royal Blue 3", lwd = 2)
+  
+  # Añadir bandas de confianza al gráfico
+  lines(valores_x, bandas_confianza_superior, col = "green", lty = 2)
+  lines(valores_x, bandas_confianza_inferior, col = "green", lty = 2)
+  
+  # Imprimir longitud de los valores para verificación
+  print(length(valores_x))
+}
+
+# Conjunto de datos de diámetros de agave
+diametro_agave <- c(23.37, 21.87, 24.41, 21.27, 23.33, 15.20, 24.21, 27.52, 
+                    15.48, 27.19, 25.05, 20.40, 21.05, 28.83, 22.90, 18.00, 
+                    17.55, 25.92, 23.64, 28.96, 23.02, 17.32, 30.74, 26.73, 
+                    17.22, 22.81, 20.78, 23.17, 21.60, 22.37)
+
+# Llamada a la función para generar la gráfica con intervalos de confianza
+distribucion_empirica_intervalos_confianza(diametro_agave, alpha = 0.05)
+distribucion_empirica_intervalos_confianza(diametro_agave, alpha = 0.01)
+```
+
+
+
+
+```{r}
+qq_plot_intervalos_confianza <- function(datos, alpha = 0.05) {
+  datos_ordenados <- sort(datos)
+  
+  n <- length(datos_ordenados)
+  p_i <- ((1:n - 0.5) / n)
+  percentiles_teoricos_normal <- qnorm(p_i)
+  
+  media_muestral <- mean(datos)
+  desviacion_muestral <- sd(datos)
+  
+  # Gráfico principal
+  plot(percentiles_teoricos_normal, datos_ordenados,
+       main = "Q-Q Normal para diámetros de agave con bandas DKW",
+       xlab = "Cuantiles teóricos de la Normal Estándar",
+       ylab = "Datos observados (Diámetros de Agave)",
+       pch = 20, col = "Royal Blue", cex = 1.2)
+  
+  # Agregar línea de referencia
+  abline(a = media_muestral, b = desviacion_muestral, col = "red", lwd = 1)
+  
+  # Cálculo de las bandas de confianza
+  epsilon_n <- sqrt((1 / (2 * n)) * log(2 / alpha))
+  bandas_confianza_superior <- qnorm(p_i + epsilon_n)
+  bandas_confianza_inferior <- qnorm(p_i - epsilon_n)
+  
+  # Graficar las bandas de confianza
+  lines(percentiles_teoricos_normal, datos_ordenados * (1 + epsilon_n), col = "green", lty = 2)
+  lines(percentiles_teoricos_normal, datos_ordenados * (1 - epsilon_n), col = "green", lty = 2)
+  
+  # Mostrar valores de media y desviación estándar en la consola
+  cat("Media muestral:", media_muestral, "\n")
+  cat("Desviación estándar muestral:", desviacion_muestral, "\n")
+}
+
+# Prueba con el conjunto de datos de agave
+diametros_agave <- c(23.37, 21.87, 24.41, 21.27, 23.33, 15.20, 24.21, 27.52, 
+                     15.48, 27.19, 25.05, 20.40, 21.05, 28.83, 22.90, 18.00, 
+                     17.55, 25.92, 23.64, 28.96, 23.02, 17.32, 30.74, 26.73, 
+                     17.22, 22.81, 20.78, 23.17, 21.60, 22.37)
+
+qq_plot_intervalos_confianza(diametros_agave, alpha = 0.05)
+qq_plot_intervalos_confianza(diametros_agave, alpha = 0.09)
+
+```
+
+d) Escriba una función en R que determine el gráfico de probabilidad normal. La función debe tomar como parámetro al conjunto de datos. \? Qué observa? 
+
+
+```{r}
+prob_normal <- function(p) {
+  z_table <- seq(-3, 3, by = 0.01)
+  p_table <- pnorm(z_table)
+
+  # Interpolación para encontrar el valor de z correspondiente a p
+  z_approx <- approx(p_table, z_table, xout = p)$y
+  return(z_approx)
+}
+
+prob_normal <- function(datos) {
+  datos_ordenados <- sort(datos)
+  
+  n <- length(datos_ordenados)
+  p_i <- (1:n - 0.5) / n
+  
+  cuantiles_teoricos <- normal_quantile_approx(p_i)
+  
+  plot(cuantiles_teoricos, datos_ordenados, 
+       main = "Gráfico de Probabilidad Normal", 
+       xlab = "Cuantiles Teóricos (Normal Estándar)", 
+       ylab = "Cuantiles Observados (Datos)",
+       pch = 19, col = "Royal Blue 3")
+  
+  media_muestral <- mean(datos_ordenados)
+  desviacion_muestral <- sd(datos_ordenados)
+  
+  abline(a = media_muestral, b = desviacion_muestral, col = "red", lwd = 1)
+  ##############################################################################
+  # Descomentar para añadir bandas de confianza aunque no sé si sirven del todo 
+  # aquí
+  #c_alpha <- sqrt(-log(0.05/2)/(2*n))
+  #bandas_confianza_superior <- qnorm(p_i + c_alpha)
+  #bandas_conafianza_inferior <- qnorm(p_i - c_alpha)
+  ##############################################################################
+  #lines(bandas_confianza_superior, datos_ordenados, col = 'green', lty = 2)
+  #lines(bandas_conafianza_inferior, datos_ordenados, col = 'green', lty = 2)
+  ##############################################################################
+}
+
+diametros_agave <- c(23.37, 21.87, 24.41, 21.27, 23.33, 15.20, 24.21, 27.52, 
+                     15.48, 27.19, 25.05, 20.40, 21.05, 28.83, 22.90, 18.00, 
+                     17.55, 25.92, 23.64, 28.96, 23.02, 17.32, 30.74, 26.73, 
+                     17.22, 22.81, 20.78, 23.17, 21.60, 22.37)
+
+prob_normal(diametros_agave)
+```
+
+Así como con los gráficos Q-Q Norm, esta gráfica de probabilidad normal se utiliza para evaluar de manera visual si nuestro conjunto de datos (en este caso, los diámetros del agave) siguen una distribución normal. Sí es normal. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

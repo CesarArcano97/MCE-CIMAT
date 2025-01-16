@@ -1,0 +1,156 @@
+---
+title: "Problema-02-Tarea-IV-Inferencia-Estadística"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(ggplot2)
+
+alpha <- 0.05
+p <- 0.4
+n_vals <- c(10, 50, 100, 250, 500, 1000, 2500, 5000, 10000) 
+simulaciones <- 1000 
+
+generar_bernoulli <- function(n, p) {
+  random_vals <- runif(n)
+  samples <- ifelse(random_vals < p, 1, 0)
+  return(samples)
+}
+
+cobertura_hoeffding <- function(n, p, alpha, simulaciones) {
+  conteo_cobertura <- 0
+  
+  for (i in 1:simulaciones) {
+    sample <- generar_bernoulli(n, p)
+    p_hat <- sum(sample) / n
+
+    epsilon <- sqrt(1 / (2 * n) * log(2 / alpha))
+    cota_inferior <- p_hat - epsilon
+    cota_superiro <- p_hat + epsilon
+    if (cota_inferior <= p && p <= cota_superiro) {
+      conteo_cobertura <- conteo_cobertura + 1
+    }
+  }
+  
+  cobertura <- conteo_cobertura / simulaciones
+  return(cobertura)
+}
+
+coberturas_totales <- sapply(n_vals, function(n) cobertura_hoeffding(n, p, alpha, simulaciones))
+results <- data.frame(
+  n = n_vals,
+  cobertura = coberturas_totales
+)
+
+ggplot(results, aes(x = factor(n), y = cobertura)) +
+  geom_col(stat = "identity", fill = "steelblue") +
+  labs(title = "Cobertura para cada valor de n",
+       x = "n",
+       y = "Cobertura") +
+  #scale_y_continuous(breaks = seq(0, 1, by = 0.1))#c(0.991, 0.992, 0.993, 0.994, 0.995, 0.996, 0.997, 0.998, 0.999, 1.00))#seq(0.9, 1, by = 0.1))
+  theme_minimal()
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+
+```{r}
+library(ggplot2)
+
+alpha <- 0.05
+p <- 0.4
+n_vals <- c(10, 50, 100, 250, 500, 1000, 2500, 5000, 10000)  
+
+longitud_intervalo_hoeffding <- function(n, alpha) {
+  epsilon <- sqrt(1 / (2 * n) * log(2 / alpha)) 
+  longitud_intervalo <- 2 * epsilon 
+  return(longitud_intervalo)
+}
+
+longitudes_intervalo <- sapply(n_vals, function(n) longitud_intervalo_hoeffding(n, alpha))
+
+longitudes <- data.frame(
+  n = n_vals,
+  longitud_intervalo = longitudes_intervalo
+)
+
+n_requerido <- min(n_vals[longitudes_intervalo < 0.05])
+print(paste("El valor mínimo de n necesario para que la longitud del intervalo sea menor que 0.05 es:", n_requerido))
+
+ggplot(longitudes, aes(x = as.factor(n), y = longitud_intervalo)) +  
+  geom_col(fill = "steelblue") +  
+  labs(title = "Longitud del intervalo de confianza contra n",
+       x = "n (Tamaño de muestra)",
+       y = "Longitud del intervalo") +
+  geom_hline(yintercept = 0.05, linetype = "dashed", color = "red") +
+  scale_y_continuous(limits = c(0, max(longitudes_intervalo) * 1.1)) +
+  theme_minimal()
+
+```
+```{r}
+set.seed(2024)
+alpha <- 0.05
+p <- 0.4
+n_vals <- c(10, 50, 100, 250, 500, 1000, 2500, 5000, 10000) 
+simulaciones <- 1000 
+
+generar_bernoulli <- function(n, p) {
+  random_vals <- runif(n)
+  samples <- ifelse(random_vals < p, 1, 0)
+  return(samples)
+}
+
+cobertura_hoeffding <- function(n, p, alpha, simulaciones) {
+  conteo_cobertura <- 0
+  
+  for (i in 1:simulaciones) {
+    sample <- generar_bernoulli(n, p)
+    p_hat <- sum(sample) / n
+
+    epsilon <- sqrt(1 / (2 * n) * log(2 / alpha))
+    cota_inferior <- p_hat - epsilon
+    cota_superior <- p_hat + epsilon
+    if (cota_inferior <= p && p <= cota_superior) {
+      conteo_cobertura <- conteo_cobertura + 1
+    }
+  }
+  
+  cobertura <- conteo_cobertura / simulaciones
+  return(cobertura)
+}
+
+coberturas_totales <- sapply(n_vals, function(n) cobertura_hoeffding(n, p, alpha, simulaciones))
+results <- data.frame(
+  n = n_vals,
+  cobertura = coberturas_totales
+)
+
+par(mar = c(5, 4, 4, 2) + 0.1, mgp = c(3, 0.5, 0))
+bar_centers <- barplot(
+  height = results$cobertura, 
+  col = "steelblue", 
+  main = "Cobertura para cada valor de n",
+  xlab = "n",
+  ylab = "Cobertura",
+  ylim = c(0.9, 1.0),  
+  las = 1,             
+  names.arg = NA       
+)
+
+axis(
+  side = 1, 
+  at = bar_centers, 
+  labels = results$n, 
+  tick = TRUE, 
+  line = 0,
+  col.axis = "orange",  
+  col.ticks = "orange", 
+  col = "orange"      
+)
+```

@@ -1,0 +1,455 @@
+---
+title: "Problema-06-Tarea-03-Inferencia-Estadística"
+author: "César Aguirre"
+output: html_notebook
+---
+
+---
+title: "Problema-06-Tarea-03-Inferencia-Estadística"
+author: "César Aguirre"
+output: html_notebook
+---
+
+## Problema 06: en este ejercicio se comprobará qué tan buena es la aproximación dada por las reglas empíricas para algunas de las distribuciiones estudiadas en clase. 
+
+Considere las distribuciones $Unif(a=-3, b=3)$, $Normal(0,1)$, $Exp(2)$, $Gamma(\alpha=2, \beta=1)$, $Gamma(\alpha=3, \beta=1)$, $Beta(\alpha=2, \beta=2)$, $Weibull(\alpha=4, \beta=1)$ y $LogNormal(\mu=3, \sigma=2)$. 
+
+a) Lee las reglas empíricas. 
+
+b) Para cada una de las distribuciones anteriores, haga una tabla que muestre las probabildaides contenidas en los intervalos $(\mu \pm k\sigma)$, para $k=1,2,3$. Utilice las fórmulas de las medias y varianzas contenidas en las notas para determinar $\mu$ y $\sigma$ en cada caso. Puede usar R para determinar las probabildiades pedidas.
+
+```{r}
+# Para la U(-3,3):
+a <- -3
+b <- 3
+mu <- (a+b)/2
+sigma <- sqrt((b - a)^2 / 12)
+
+probabilidad_unifrome <- sapply(1:3, function(k) {
+  intervalo <- c(mu-k*sigma, mu+k*sigma)
+  punif(intervalo[2], a, b)-punif(intervalo[1], a, b)
+})
+
+resultados$uniforme <- probabilidad_unifrome
+print(probabilidad_unifrome)
+```
+
+```{r}
+# Para la Normal(0,1)
+
+mu <- 0
+sigma <- 1
+
+probabilidad_normal <- sapply(1:3, function(k){
+  intervalo <- c(mu-k*sigma, mu+k*sigma)
+  pnorm(intervalo[2])-pnorm(intervalo[1])
+})
+
+resultados$normal <- probabilidad_normal
+print(probabilidad_normal)
+```
+
+```{r}
+# Para la Exponencial(2)
+
+lambda <- 2
+mu <- 1/lambda
+sigma <- 1/lambda
+
+probabilidad_exponencial <- sapply(1:3, function(k){
+  intervalo <- c(mu-k*sigma, mu+k*sigma)
+  pexp(intervalo[2], rate=lambda) - pexp(intervalo[1], rate=lambda)
+})
+
+resultados$exponencial <- probabilidad_exponencial
+print(probabilidad_exponencial)
+```
+
+```{r}
+# Para Gamma(2, 1)
+
+alpha <- 2
+beta <- 1
+mu <- alpha*beta
+sigma <- sqrt(alpha * beta^2)
+
+probabilidad_gamma21 <- sapply(1:3, function(k){
+  intervalo <- c(mu-k*sigma, mu+k*sigma)
+  pgamma(intervalo[2], shape=alpha, scale=beta) - pgamma(intervalo[1], shape=alpha, scale=beta)
+})
+
+resultados$gamma21 <- probabilidad_gamma21
+probabilidad_gamma21
+```
+
+```{r}
+# Para Gamma(2, 2)
+
+alpha <- 2
+beta <- 2
+mu <- alpha*beta
+sigma <- sqrt(alpha * beta^2)
+
+probabilidad_gamma22 <- sapply(1:3, function(k){
+  intervalo <- c(mu-k*sigma, mu+k*sigma)
+  pgamma(intervalo[2], shape=alpha, scale=beta) - pgamma(intervalo[1], shape=alpha, scale=beta)
+})
+
+resultados$gamma22 <- probabilidad_gamma22
+probabilidad_gamma22
+```
+
+```{r}
+# Para Gamma(2, 2)
+
+alpha <- 1
+beta <- 2
+mu <- alpha*beta
+sigma <- sqrt(alpha * beta^2)
+
+probabilidad_gamma22 <- sapply(1:3, function(k){
+  intervalo <- c(mu-k*sigma, mu+k*sigma)
+  pgamma(intervalo[2], shape=alpha, scale=beta) - pgamma(intervalo[1], shape=alpha, scale=beta)
+})
+
+resultados$gamma22 <- probabilidad_gamma22
+probabilidad_gamma22
+```
+
+```{r}
+# Para Gamma(2, 2)
+
+alpha <- 1
+beta <- 300
+mu <- alpha*beta
+sigma <- sqrt(alpha * beta^2)
+
+probabilidad_gamma22 <- sapply(1:3, function(k){
+  intervalo <- c(mu-k*sigma, mu+k*sigma)
+  pgamma(intervalo[2], shape=alpha, scale=beta) - pgamma(intervalo[1], shape=alpha, scale=beta)
+})
+
+resultados$gamma22 <- probabilidad_gamma22
+probabilidad_gamma22
+```
+
+
+```{r}
+# Para Beta(2, 2)
+
+alpha <- 2
+beta <- 2
+mu <- alpha/(alpha+beta)
+sigma <- sqrt((alpha*beta)/((alpha + beta^2 * (alpha + beta + 1))))
+
+probabilidad_beta <- sapply(1:3, function(k){
+  intervalo <- c(mu-k*sigma, mu+k*sigma)
+  pbeta(intervalo[2], alpha, beta) - pbeta(intervalo[1], alpha, beta)
+})
+
+resultados$beta <- probabilidad_beta
+probabilidad_beta
+```
+
+```{r}
+# Para Weibull(4,1)
+
+alpha <- 4
+beta <- 1
+mu <- beta * gamma(1 + 1/alpha)
+sigma <- beta * sqrt(gamma(1 + 2/alpha) - (gamma(1 + 1/alpha))^2)
+
+probabilidad_weibull <- sapply(1:3, function(k) {
+  intervalo <- c(mu - k * sigma, mu + k * sigma)
+  pweibull(intervalo[2], shape = alpha, scale = beta) - pweibull(intervalo[1], shape = alpha, scale = beta)
+})
+
+resultados$weibull <- probabilidad_weibull
+probabilidad_weibull
+```
+
+```{r}
+# Para Lognormal(3, 2)
+
+mu_ln <- 3
+sigma_ln <- 2
+mu <- exp(mu_ln + sigma_ln^2 / 2)
+sigma <- sqrt((exp(sigma_ln^2) - 1) * exp(2 * mu_ln + sigma_ln^2))
+
+probabilidad_lognormal <- sapply(1:3, function(k) {
+  intervalo <- c(mu - k * sigma, mu + k * sigma)
+  plnorm(intervalo[2], meanlog = mu_ln, sdlog = sigma_ln) - plnorm(intervalo[1], meanlog = mu_ln, sdlog = sigma_ln)
+})
+
+resultados$lognormal <- probabilidad_lognormal
+probabilidad_lognormal
+```
+
+
+
+```{r}
+# Hacemos la tabla
+
+tabla_resultados <- data.frame(
+  Distribución = names(resultados),
+  P_k_1 = sapply(resultados, function(x) x[1]),
+  P_k_2 = sapply(resultados, function(x) x[2]),
+  P_k_3 = sapply(resultados, function(x) x[3])
+)
+
+print(tabla_resultados)
+```
+
+
+```{r}
+# Media muestral
+media_muestral <- function(x) {
+  n <- length(x)
+  sum(x) / n
+}
+
+# Varianza muestral
+varianza_muestral <- function(x) {
+  n <- length(x)
+  mean((x - media_muestral(x))^2) * (n / (n - 1)) 
+}
+```
+
+
+```{r}
+set.seed(2024)  
+n <- 1000      
+k_values <- 1:3 
+resultados_2 <- list()  
+
+# Distribución Uniforme U(-3, 3)
+samples_unif <- runif(n, min = -3, max = 3)
+mean_unif <- media_muestral(samples_unif)
+var_unif <- varianza_muestral(samples_unif)
+proportion_unif <- sapply(k_values, function(k) {
+  mean(samples_unif >= (mean_unif - k * sqrt(var_unif)) & 
+       samples_unif <= (mean_unif + k * sqrt(var_unif)))
+})
+resultados_2$uniforme <- c(mean = mean_unif, var = var_unif, proportion = proportion_unif)
+
+# Distribución Normal N(0, 1)
+samples_norm <- rnorm(n, mean = 0, sd = 1)
+mean_norm <- media_muestral(samples_norm)
+var_norm <- varianza_muestral(samples_norm)
+proportion_norm <- sapply(k_values, function(k) {
+  mean(samples_norm >= (mean_norm - k * sqrt(var_norm)) & 
+       samples_norm <= (mean_norm + k * sqrt(var_norm)))
+})
+resultados_2$normal <- c(mean = mean_norm, var = var_norm, proportion = proportion_norm)
+
+# Distribución Exponencial(2)
+samples_exp <- rexp(n, rate = 2)
+mean_exp <- media_muestral(samples_exp)
+var_exp <- varianza_muestral(samples_exp)
+proportion_exp <- sapply(k_values, function(k) {
+  mean(samples_exp >= (mean_exp - k * sqrt(var_exp)) & 
+       samples_exp <= (mean_exp + k * sqrt(var_exp)))
+})
+resultados_2$exponencial <- c(mean = mean_exp, var = var_exp, proportion = proportion_exp)
+
+# Distribución Gamma(2, 1)
+samples_gamma21 <- rgamma(n, shape = 2, scale = 1)
+mean_gamma21 <- media_muestral(samples_gamma21)
+var_gamma21 <- varianza_muestral(samples_gamma21)
+proportion_gamma21 <- sapply(k_values, function(k) {
+  mean(samples_gamma21 >= (mean_gamma21 - k * sqrt(var_gamma21)) & 
+       samples_gamma21 <= (mean_gamma21 + k * sqrt(var_gamma21)))
+})
+resultados_2$gamma21 <- c(mean = mean_gamma21, var = var_gamma21, proportion = proportion_gamma21)
+
+# Distribución Gamma(2, 2)
+samples_gamma22 <- rgamma(n, shape = 2, scale = 2)
+mean_gamma22 <- media_muestral(samples_gamma22)
+var_gamma22 <- varianza_muestral(samples_gamma22)
+proportion_gamma22 <- sapply(k_values, function(k) {
+  mean(samples_gamma22 >= (mean_gamma22 - k * sqrt(var_gamma22)) & 
+       samples_gamma22 <= (mean_gamma22 + k * sqrt(var_gamma22)))
+})
+resultados_2$gamma22 <- c(mean = mean_gamma22, var = var_gamma22, proportion = proportion_gamma22)
+
+# Distribución Beta(2, 2)
+samples_beta <- rbeta(n, shape1 = 2, shape2 = 2)
+mean_beta <- media_muestral(samples_beta)
+var_beta <- varianza_muestral(samples_beta)
+proportion_beta <- sapply(k_values, function(k) {
+  mean(samples_beta >= (mean_beta - k * sqrt(var_beta)) & 
+       samples_beta <= (mean_beta + k * sqrt(var_beta)))
+})
+resultados_2$beta <- c(mean = mean_beta, var = var_beta, proportion = proportion_beta)
+
+# Distribución Weibull(4, 1)
+samples_weibull <- rweibull(n, shape = 4, scale = 1)
+mean_weibull <- media_muestral(samples_weibull)
+var_weibull <- varianza_muestral(samples_weibull)
+proportion_weibull <- sapply(k_values, function(k) {
+  mean(samples_weibull >= (mean_weibull - k * sqrt(var_weibull)) & 
+       samples_weibull <= (mean_weibull + k * sqrt(var_weibull)))
+})
+resultados_2$weibull <- c(mean = mean_weibull, var = var_weibull, proportion = proportion_weibull)
+
+# Distribución Lognormal(3, 2)
+samples_lognormal <- rlnorm(n, meanlog = 3, sdlog = 2)
+mean_lognormal <- media_muestral(samples_lognormal)
+var_lognormal <- varianza_muestral(samples_lognormal)
+proportion_lognormal <- sapply(k_values, function(k) {
+  mean(samples_lognormal >= (mean_lognormal - k * sqrt(var_lognormal)) & 
+       samples_lognormal <= (mean_lognormal + k * sqrt(var_lognormal)))
+})
+resultados_2$lognormal <- c(mean = mean_lognormal, var = var_lognormal, proportion = proportion_lognormal)
+
+# Convertir resultados a data.frame para mejor visualización
+resultados_df <- do.call(rbind, resultados_2)
+resultados_df <- as.data.frame(resultados_df)
+resultados_df <- round(resultados_df, 4)
+colnames(resultados_df) <- c("Media", "Varianza", "Proporción_k1", "Proporción_k2", "Proporción_k3")
+
+print(resultados_df)
+
+```
+
+```{r}
+set.seed(2024)  
+n <- 1000      
+k_values <- 1:3 
+resultados_3 <- list()  
+
+# Distribución Uniforme U(-3, 3)
+samples_unif <- runif(n, min = -3, max = 3)
+mean_unif <- media_muestral(samples_unif)
+var_unif <- varianza_muestral(samples_unif)
+proportion_unif <- sapply(k_values, function(k) {
+  mean(samples_unif >= (mean_unif - k * sqrt(var_unif)) & 
+       samples_unif <= (mean_unif + k * sqrt(var_unif)))
+})
+resultados_3$uniforme <- c(proportion = proportion_unif)
+
+# Distribución Normal N(0, 1)
+samples_norm <- rnorm(n, mean = 0, sd = 1)
+mean_norm <- media_muestral(samples_norm)
+var_norm <- varianza_muestral(samples_norm)
+proportion_norm <- sapply(k_values, function(k) {
+  mean(samples_norm >= (mean_norm - k * sqrt(var_norm)) & 
+       samples_norm <= (mean_norm + k * sqrt(var_norm)))
+})
+resultados_3$normal <- c(proportion = proportion_norm)
+
+# Distribución Exponencial(2)
+samples_exp <- rexp(n, rate = 2)
+mean_exp <- media_muestral(samples_exp)
+var_exp <- varianza_muestral(samples_exp)
+proportion_exp <- sapply(k_values, function(k) {
+  mean(samples_exp >= (mean_exp - k * sqrt(var_exp)) & 
+       samples_exp <= (mean_exp + k * sqrt(var_exp)))
+})
+resultados_3$exponencial <- c(proportion = proportion_exp)
+
+# Distribución Gamma(2, 1)
+samples_gamma21 <- rgamma(n, shape = 2, scale = 1)
+mean_gamma21 <- media_muestral(samples_gamma21)
+var_gamma21 <- varianza_muestral(samples_gamma21)
+proportion_gamma21 <- sapply(k_values, function(k) {
+  mean(samples_gamma21 >= (mean_gamma21 - k * sqrt(var_gamma21)) & 
+       samples_gamma21 <= (mean_gamma21 + k * sqrt(var_gamma21)))
+})
+resultados_3$gamma21 <- c(proportion = proportion_gamma21)
+
+# Distribución Gamma(2, 2)
+samples_gamma22 <- rgamma(n, shape = 2, scale = 2)
+mean_gamma22 <- media_muestral(samples_gamma22)
+var_gamma22 <- varianza_muestral(samples_gamma22)
+proportion_gamma22 <- sapply(k_values, function(k) {
+  mean(samples_gamma22 >= (mean_gamma22 - k * sqrt(var_gamma22)) & 
+       samples_gamma22 <= (mean_gamma22 + k * sqrt(var_gamma22)))
+})
+resultados_3$gamma22 <- c(proportion = proportion_gamma22)
+
+# Distribución Beta(2, 2)
+samples_beta <- rbeta(n, shape1 = 2, shape2 = 2)
+mean_beta <- media_muestral(samples_beta)
+var_beta <- varianza_muestral(samples_beta)
+proportion_beta <- sapply(k_values, function(k) {
+  mean(samples_beta >= (mean_beta - k * sqrt(var_beta)) & 
+       samples_beta <= (mean_beta + k * sqrt(var_beta)))
+})
+resultados_3$beta <- c(proportion = proportion_beta)
+
+# Distribución Weibull(4, 1)
+samples_weibull <- rweibull(n, shape = 4, scale = 1)
+mean_weibull <- media_muestral(samples_weibull)
+var_weibull <- varianza_muestral(samples_weibull)
+proportion_weibull <- sapply(k_values, function(k) {
+  mean(samples_weibull >= (mean_weibull - k * sqrt(var_weibull)) & 
+       samples_weibull <= (mean_weibull + k * sqrt(var_weibull)))
+})
+resultados_3$weibull <- c(proportion = proportion_weibull)
+
+# Distribución Lognormal(3, 2)
+samples_lognormal <- rlnorm(n, meanlog = 3, sdlog = 2)
+mean_lognormal <- media_muestral(samples_lognormal)
+var_lognormal <- varianza_muestral(samples_lognormal)
+proportion_lognormal <- sapply(k_values, function(k) {
+  mean(samples_lognormal >= (mean_lognormal - k * sqrt(var_lognormal)) & 
+       samples_lognormal <= (mean_lognormal + k * sqrt(var_lognormal)))
+})
+resultados_3$lognormal <- c(proportion = proportion_lognormal)
+
+# Convertir resultados a data.frame para mejor visualización
+resultados_df <- do.call(rbind, resultados_3)
+resultados_df <- as.data.frame(resultados_df)
+resultados_df <- round(resultados_df, 4)
+colnames(resultados_df) <- c("Proporción_k1", "Proporción_k2", "Proporción_k3")
+
+print(resultados_df)
+
+```
+
+
+```{r}
+print(resultados_3)
+print(resultados)
+```
+
+
+```{r}
+# Inicializar una lista vacía para almacenar las diferencias
+diferencias <- list()
+
+# Calcular la diferencia absoluta
+for (dist in names(resultados_3)) {
+  dif <- abs(resultados_3[[dist]] - resultados[[dist]])
+  diferencias[[dist]] <- dif
+}
+
+# Mostrar las diferencias absolutas
+print(diferencias)
+
+```
+
+```{r}
+
+# Convertir resultados a data.frame para mejor visualización
+diferencias_df <- do.call(rbind, diferencias)
+diferencias_df <- as.data.frame(diferencias_df)
+diferencias_df <- round(diferencias_df, 4)
+colnames(diferencias_df) <- c("k=1", "k=2", "k=3")
+
+print(diferencias_df)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

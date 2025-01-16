@@ -1,0 +1,105 @@
+---
+title: "R Notebook"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+
+### Problema 05: Un lote de N=400 productos industriales contiene 160 defectuosos. Sea Y el número de defectuosos en una muestra aleatoria de tamaño 20:
+
+* Encuentra p(10) con el uso de (a) la distribución de probabilidad hipergeométrica.
+* Encuentra p(10) la distribución de probabilidad binomial.
+* Es N suficientemente grande para que el valor p(10) obtenido con la binomial sea una buena aproximación de la obtenida por la hipergeométrica?
+
+```{r}
+library(ggplot2)
+
+######################################################################################################################
+######################################################################################################################
+########### Prueba comparativa con p(10) de cada una de las distribuciones (hipergeométrica y binomial) ##############
+######################################################################################################################
+######################################################################################################################
+
+hipergeometrica <- function(y, N, D, n) {
+  choose(D, y) * choose(N - D, n - y) / choose(N, n)
+}
+
+binomial <- function(y, n, p) {
+  choose(n, y) * (p^y) * ((1 - p)^(n - y))
+}
+
+N <- 400  
+D <- 160 
+n <- 20  
+y <- 10   
+p <- D / N  
+
+# Cálculo de p(10) con la hipergeométrica 
+p_hipergeometrica <- hipergeometrica(y, N, D, n)
+cat("Probabilidad p(10) dada por la hipergeométrica:", p_hipergeometrica, "\n")
+
+# Cálculo de p(10) con la distribución binomial
+p_binomial <- binomial(y, n, p)
+cat("Probabilidad p(10) dada por la binomial:", p_binomial, "\n")
+
+#print("")
+
+# Sabemos que si la muestra es pequeña, es suficientemente aceptable que nuestra comparativa sea mayor a 0.1
+if (n / N < 0.1) {
+  cat("Se confirma que la binomial sea una aproximación aceptable.\n")
+} else {
+  cat("Se rechaza que la binomial sea una aproximación aceptable.\n")
+}
+
+######################################################################################################################
+######################################################################################################################
+########### Podemos utilizar una prueba de Ji-cuadrada para verificar nuestro supuesto anterior, con H_0 #############
+######################################################################################################################
+######################################################################################################################
+y_values <- 0:n 
+
+p_hipergeometrica <- sapply(y_values, function(y) hipergeometrica(y, N, D, n))
+p_binomial <- sapply(y_values, function(y) binomial(y, n, p))
+
+n_simulaciones <- 1000  
+observed <- p_hipergeometrica * n_simulaciones  
+expected <- p_binomial * n_simulaciones  
+
+expected <- ifelse(expected == 0, 1e-10, expected)
+
+chi_squared_test <- chisq.test(observed, p = expected / sum(expected))
+
+print("Hipótesis nula (H_o): La binomial es una aproximación aceptable de la hipergeométrica para este caso")
+
+cat("Estadístico ji-cuadrado:", chi_squared_test$statistic, "\n")
+cat("Valor p:", chi_squared_test$p.value, "\n")
+cat("Grados de libertad:", chi_squared_test$parameter, "\n")
+
+if (chi_squared_test$p.value < 0.05) {
+  cat("Rechazamos la hipótesis nula => las distribuciones son significativamente diferentes.\n")
+} else {
+  cat("No se rechaza la hipótesis nula => las distribuciones no son significativamente diferentes.\n")
+}
+
+######################################################################################################################
+######################################################################################################################
+########## Impresión de un histograma comparativo para ver cómo se comportan las distribuciones ######################
+######################################################################################################################
+######################################################################################################################
+
+df <- data.frame(
+  y = rep(y_values, 2),
+  Probabilidad = c(p_hipergeometrica, p_binomial),
+  Distribución = rep(c("Hipergeométrica", "Binomial"), each = length(y_values))
+)
+
+ggplot(df, aes(x = y, y = Probabilidad, fill = Distribución)) +
+  geom_bar(stat = "identity", position = "dodge", alpha = 0.7) +
+  scale_fill_manual(values = c("blue", "yellow")) +
+  labs(title = "Comparación de las distribuciones Hipergeométrica y Binomial",
+       x = "Número de defectuosos (y)", y = "Probabilidad") +
+  theme_minimal()
+```
+
+Podemos ver cómo, tanto  con la prueba comparativa con la p(10) como la prueba con Ji-cuadrada, se puede aceptar a la Binomial como una aproximación aceptable para este caso particular. En general, se conoce que cuando la aproximación n/N es ~ 10% entonces se tiene una buena aproximación. En general, cuando se tiene un N >> n, la aproximación es excelente. Además, podemos comprobar por el gráfico como es que ambas distribuciones se ven bien, quedando casi empalmadas. No hay mucha diferencia. 

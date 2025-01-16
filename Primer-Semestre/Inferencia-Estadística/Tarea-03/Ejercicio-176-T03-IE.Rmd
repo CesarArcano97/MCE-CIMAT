@@ -1,0 +1,15 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+y <- runif(100, min = 0, max = 1)
+x <- -2 * log(1 - y)
+
+hist(x, breaks = 10, col = "blue", border = "black", 
+     main = "Histograma de la columna transformada", 
+     xlab = "Valores de x", ylab = "Frecuencia")
+
+grid()
+```

@@ -1,0 +1,175 @@
+---
+title: "Problema-06-Tarea-04-Inferencia-Estadística"
+author: "Aguirre César"
+output: html_notebook
+---
+
+## Regresión lineal 
+
+Cargue en R al conjunto de datos "Maiz.csv", el cual contiene el precio mensual de la tonelada de maíz y el precio de la tonelada de tortillas en USD. En este ejercicio, tendrá que estimar los coeficientes de una regresión lineal simple. 
+
+Problema a): Calcule de forma explícita la estimación de los coeficientes via mínimos cuadrados y ajuste la regresión correspondiente. Concluya. 
+
+```{r}
+df <- read.csv("/home/cesar/Documentos/Tareas-CIMAT/Primer_Semestre/Inferencia_Estadística/Tarea-04/Maiz.csv", fileEncoding = "ISO-8859-1")
+head(df, 10)
+```
+
+```{r}
+colnames(df)[colnames(df) == "P..Tonelada.Maíz"] <- "Precio_Maiz"
+colnames(df)[colnames(df) == "P..Tonelada.Tortilla"] <- "Precio_Tortilla"
+# Calcular la matriz de correlación
+cor(df$Precio_Maiz, df$Precio_Tortilla)
+cor(df)
+```
+
+```{r}
+x <- df$Precio_Maiz
+y <- df$Precio_Tortilla
+
+x_bar <- mean(x)
+y_bar <- mean(y)
+beta1 <- sum((x - x_bar) * (y - y_bar)) / sum((x - x_bar)^2)
+beta0 <- y_bar - beta1 * x_bar
+
+cat("Pendiente (beta1):", beta1, "\n")
+cat("Intersección (beta0):", beta0, "\n")
+```
+```{r}
+plot(df$Precio_Maiz, df$Precio_Tortilla, xlab = "Precio Maiz", ylab = "Precio Tortilla", main = "Ajuste por Mínimos Cuadrados", pch = 19, col = "blue")
+
+abline(beta0, beta1, col = "red", lwd = 2)
+```
+
+
+## Estimador de Nadaraya-Watson
+Problema b): Calcule de forma explícita la estimación de los coeficientes via regresión no-paramétrica tipo kernel, y ajuste la regresión correspondiente. Concluya. 
+
+Primero que nada, explicaremos un poco respecto al modelo de Nadaraya-Watson. En el artículo: "On Estimating Regressions", de E. A. Nadaraya, se muestra la estiamción de la regresión cuando los parámetros que tenemos no siguen una forma analítica conocida. Es deicr, cuando no podemos utilizar técnicas como los mínimos cuadrados para ajustar un modelo lineal simple. El documento propone una alternativa estadística para estimar curvas de regresión a partir de datos empíricos utilizando una función de densidad, denomindada la función de núcleo $K(x)$, conocida como el Kernel. 
+
+El estimador Nadaraya-Watson propone una ecuación para la estiamción de la curva de regresión, la cual es la siguiente:
+
+\begin{equation*}
+  m_h(x) = \frac{\sum_{i=1}^{n}Y_i K(\frac{x - X_i}{h})}{\sum_{i=1}^{n}K(\frac{x - X_i}{h})}
+\end{equation*}
+
+Como mencionamos, $K(x)$ es la función Kernel que determina la ``suavización'' del estiamdor y $h$ es el parámetro de banda que controla dicho nivel de suavidad. Este estimador está destinado a ponderar los valores medidos de $Y_i$, según qué tan cercano está a $x$, acorde a la medidad del Kernel. 
+
+Dentro del documento podemos leer como, bajo ciertas condiciones, el estimador es bastante consistente. Es decir, a medida que el tamaño de la muestra crece, el estimador converge a la verdadera curva de regresión, siendo una aproximación sólida. También se establece que, nuevamente, bajo ciertas condiciones, el estiamdor es asintóticamente normal. Esto significa que se distribuye de manera normal en le límite cuando el tamaño de la muestra tiende a infinito. 
+
+Al final, este estimador es útil para ajustar modelos cuando la relación entre las variables no parece lineal, o cuando queremos obtener patrones más complejos. 
+
+En este primer intento, se aplica el Kernel Gaussiano para intentar hacer el ajuste. Contrario al segundo intento (que se verá a continuación), no se acomodaron los datos antes de realizar la estimación Nadaraya-Watson. Haremos una prueba con distintas bandas $h$, para notar mejor la diferencia entre el intento con los datos ordenados y el intento sin ordenar los datos. 
+
+## Prueba 01: datos sin ordenar para el stimador. 
+
+
+```{r}
+gaussian_kernel <- function(u) {
+  return( (1/sqrt(2 * pi)) * exp(-0.5 * u^2) )
+}
+
+nadaraya_watson <- function(x, X, Y, h) {
+  weights <- gaussian_kernel((x - X) / h)
+  numerador <- sum(weights * Y)
+  denominador <- sum(weights)
+  return(numerador / denominador)
+}
+
+X <- df$Precio_Maiz
+Y <- df$Precio_Tortilla
+
+h_0 <- 0.5
+y_est_0 <- sapply(X, function(x) nadaraya_watson(x, X, Y, h_0))
+
+plot(X, Y, main="Ajuste de Nadaraya-Watson", xlab="Precio Maiz", ylab="Precio Tortilla", pch = 19, col = "blue")
+lines(X, y_est_0, col="red", lwd=2)
+text(x = max(X) * 0.7, y = max(Y) * 0.9, labels = paste("h =", h_0), col = "black", cex = 1.2) 
+
+# banda h=3.5
+h_1 <- 3.5
+y_est_1 <- sapply(X, function(x) nadaraya_watson(x, X, Y, h_1))
+
+plot(X, Y, main="Ajuste de Nadaraya-Watson", xlab="Precio Maiz", ylab="Precio Tortilla", pch = 19, col = "blue")
+lines(X, y_est_1, col="red", lwd=2)
+text(x = max(X) * 0.7, y = max(Y) * 0.9, labels = paste("h =", h_1), col = "black", cex = 1.2) 
+
+# banda h=6.5
+h_2 <- 6.5
+y_est_2 <- sapply(X, function(x) nadaraya_watson(x, X, Y, h_2))
+
+plot(X, Y, main="Ajuste de Nadaraya-Watson", xlab="Precio Maiz", ylab="Precio Tortilla", pch = 19, col = "blue")
+lines(X, y_est_2, col="red", lwd=2)
+text(x = max(X) * 0.7, y = max(Y) * 0.9, labels = paste("h =", h_2), col = "black", cex = 1.2) 
+
+# banda h=9.5
+h_3 <- 20.0
+y_est_3 <- sapply(X, function(x) nadaraya_watson(x, X, Y, h_3))
+
+plot(X, Y, main="Ajuste de Nadaraya-Watson", xlab="Precio Maiz", ylab="Precio Tortilla", pch = 19, col = "blue")
+lines(X, y_est_3, col="red", lwd=2)
+text(x = max(X) * 0.7, y = max(Y) * 0.9, labels = paste("h =", h_3), col = "black", cex = 1.2) 
+```
+
+```{r}
+gaussian_kernel <- function(u) {
+  return((1 / sqrt(2 * pi)) * exp(-0.5 * u^2))
+}
+
+nadaraya_watson <- function(x, X, Y, h) {
+  weights <- gaussian_kernel((x - X) / h)
+  numerador <- sum(weights * Y)
+  denominador <- sum(weights)
+  if (denominador == 0) {
+    return(NA)  
+  } else {
+    return(numerador / denominador)
+  }
+}
+
+X <- df$Precio_Maiz
+Y <- df$Precio_Tortilla
+
+# Ancho de banda
+h_0 <- 0.05
+h_1 <- 3.5
+h_2 <- 6.5
+h_3 <- 20
+
+# Crear una grid de puntos para la estimación
+x_grid <- seq(min(X), max(X), length.out = 100)
+
+y_grid_0 <- sapply(x_grid, function(x) nadaraya_watson(x, X, Y, h_0))
+y_grid_1 <- sapply(x_grid, function(x) nadaraya_watson(x, X, Y, h_1))
+y_grid_2 <- sapply(x_grid, function(x) nadaraya_watson(x, X, Y, h_2))
+y_grid_3 <- sapply(x_grid, function(x) nadaraya_watson(x, X, Y, h_3))
+
+# Ordenar los datos para la gráfica
+order_index <- order(X)
+X_sorted <- X[order_index]
+Y_sorted <- Y[order_index]
+
+# Graficar
+plot(X_sorted, Y_sorted, main = "Ajuste de Nadaraya-Watson", xlab = "Precio Maiz", ylab = "Precio Tortilla", pch = 19, col = "blue")
+lines(x_grid, y_grid_0, col = "red", lwd = 2)
+
+# h_1
+plot(X_sorted, Y_sorted, main = "Ajuste de Nadaraya-Watson", xlab = "Precio Maiz", ylab = "Precio Tortilla", pch = 19, col = "blue")
+lines(x_grid, y_grid_1, col = "red", lwd = 2)
+
+# h_2
+plot(X_sorted, Y_sorted, main = "Ajuste de Nadaraya-Watson", xlab = "Precio Maiz", ylab = "Precio Tortilla", pch = 19, col = "blue")
+lines(x_grid, y_grid_2, col = "red", lwd = 2)
+
+# h_3
+plot(X_sorted, Y_sorted, main = "Ajuste de Nadaraya-Watson", xlab = "Precio Maiz", ylab = "Precio Tortilla", pch = 19, col = "blue")
+lines(x_grid, y_grid_3, col = "red", lwd = 2)
+
+# Agregar leyenda
+#legend("bottomright", legend = c("Datos observados", "Ajuste Nadaraya-Watson"), col = c("blue", "red"), pch = c(19, NA), lty = c(NA, 1), lwd = c(NA, 2))
+```
+Podemos ver, desde las $h = 1.5$, que ordenar los datos parece ser una muy buena idea para mejorar la suavidad y tendencia del ajuste. Cuando $h$ es más pequeña, se nota el sobre-ajuste (overfitting) de los datos. Mientras más grande $h$, el estimador se acerca más a la verdadera tendencia de los datos. Sin embargo, cuando $h$ es muy grande, el ajuste presenta underfitting, acercandose a una línea horizontal que no representa para nada la tendencia de los datos. 
+
+Por otra parte, al comparar el ajuste con Kernel Gaussiano, comparado con el ajuste por mínimos cuadrados, son bastante parecidos cuando $h$ oscila alrededor de 6 unidades. Son embargo, presenta una ligera concavidad alrededor del punto $(x = 140, y = 750)$. Esto parecería indicar que la tendencia de los datos no es totalemtne lineal. Pese a todo, creo que no tenemos suficientes muestras como para determinar si en un caso límite (con muchos más datos), revele la concavidad de la estimación Nadaraya-Watson. 
+
+A pesar de todo, creo que ambos ajustes se acercan bastante a una estimación adecuada. 
